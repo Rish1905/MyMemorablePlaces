@@ -12,23 +12,46 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
+
+    //Variables for Floating buttons
+    FloatingActionButton fab_plus,fab_note,fab_folder;
+    Animation fabOpen,fabClose,fabClockwise,fabAnticlockwise;
+    boolean isOpen = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        init();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+        fab_plus.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                if(isOpen){
+                    fab_folder.startAnimation(fabClose);
+                    fab_note.startAnimation(fabClose);
+                    fab_plus.startAnimation(fabAnticlockwise);
+                    fab_note.setClickable(false);
+                    fab_folder.setClickable(false);
+                    isOpen=false;
+                }
+                else{
+                    fab_folder.startAnimation(fabOpen);
+                    fab_note.startAnimation(fabOpen);
+                    fab_plus.startAnimation(fabClockwise);
+                    fab_note.setClickable(true);
+                    fab_folder.setClickable(true);
+                    isOpen=true;
+                }
             }
         });
 
@@ -40,6 +63,19 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+    }
+
+    public void init(){
+        //Initialize the floting buttons
+        fab_plus = (FloatingActionButton) findViewById(R.id.fab_plus);
+        fab_note = (FloatingActionButton) findViewById(R.id.fab_note);
+        fab_folder = (FloatingActionButton) findViewById(R.id.fab_folder);
+        fabOpen = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_open);
+        fabClose = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_close);
+        fabClockwise = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_clockwise);
+        fabAnticlockwise = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_anticlockwise);
+
+
     }
 
     @Override
