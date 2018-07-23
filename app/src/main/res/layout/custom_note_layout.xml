@@ -30,11 +30,11 @@
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="170dp"
-                android:id="@+id/cardImage"
+                android:id="@+id/ImageNoteView"
                 android:scaleType="centerCrop"/>
 
             <TextView
-                android:id="@+id/cardTitle"
+                android:id="@+id/noteTitle"
                 android:gravity="center_vertical"
                 android:text="Card Title"
                 android:layout_width="match_parent"

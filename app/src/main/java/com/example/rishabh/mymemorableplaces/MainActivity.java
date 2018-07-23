@@ -138,6 +138,14 @@ public class MainActivity extends AppCompatActivity
         folderArrayList.clear();
         fetchFolders();
         adapter.notifyDataSetChanged();
+        if(isOpen){
+            fab_folder.startAnimation(fabClose);
+            fab_note.startAnimation(fabClose);
+            fab_plus.startAnimation(fabAnticlockwise);
+            fab_note.setClickable(false);
+            fab_folder.setClickable(false);
+            isOpen=false;
+        }
     }
 
     @Override
@@ -180,6 +188,9 @@ public class MainActivity extends AppCompatActivity
 
         if (id == R.id.nav_camera) {
             // Handle the camera action
+
+            Intent intent = new Intent(MainActivity.this,ViewNotes.class);
+            startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
         } else if (id == R.id.nav_slideshow) {
