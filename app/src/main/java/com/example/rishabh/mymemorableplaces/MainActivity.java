@@ -1,9 +1,12 @@
 package com.example.rishabh.mymemorableplaces;
 
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -15,6 +18,9 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.GridView;
+
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
@@ -24,12 +30,28 @@ public class MainActivity extends AppCompatActivity
     Animation fabOpen,fabClose,fabClockwise,fabAnticlockwise;
     boolean isOpen = false;
 
+    //List of Folders
+    ArrayList<Folder> folderArrayList;
+    CustomFolderAdapter adapter = null;
+
+    //Database
+    SQLiteDatabase myDatabase;
+
+    //GridView
+    GridView gridView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         init();
+
+        fetchFolders();
+
+        adapter = new CustomFolderAdapter(this, R.layout.custom_folder_layout, folderArrayList);
+        gridView.setAdapter(adapter);
+
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -64,6 +86,14 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
+        fab_note.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,AddNoteActivity.class);
+                startActivity(intent);
+            }
+        });
+
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -83,8 +113,31 @@ public class MainActivity extends AppCompatActivity
         fabClose = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.fab_close);
         fabClockwise = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_clockwise);
         fabAnticlockwise = AnimationUtils.loadAnimation(getApplicationContext(),R.anim.rotate_anticlockwise);
+        folderArrayList = new ArrayList<Folder>();
 
+        myDatabase = this.openOrCreateDatabase("myMemories",MODE_PRIVATE,null);
 
+        gridView = (GridView) findViewById(R.id.gridview);
+    }
+
+    public void fetchFolders(){
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (foldeName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+        Cursor c = myDatabase.rawQuery("SELECT * FROM newFolder ",null);
+        if(c.moveToFirst()) {
+            do{
+                String folderName = c.getString(c.getColumnIndex("foldeName"));
+                byte[] folderImage = c.getBlob(c.getColumnIndex("image"));
+                folderArrayList.add(new Folder(folderImage,folderName));
+            }while(c.moveToNext());
+        }
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        folderArrayList.clear();
+        fetchFolders();
+        adapter.notifyDataSetChanged();
     }
 
     @Override

@@ -19,14 +19,21 @@ public class CustomFolderAdapter extends BaseAdapter implements Filterable{
 
     private LayoutInflater inflater;
     private Context context;
+    private  int layout;
     ArrayList<Folder> folderList;
     ArrayList<Folder> filterList;
     CustomFilter filter;
 
-    public CustomFolderAdapter(Context context,ArrayList<Folder> folderList){
+    public CustomFolderAdapter(Context context,int layout, ArrayList<Folder> folderList){
         this.folderList = folderList;
         this.context = context;
         this.filterList = folderList;
+        this.layout = layout;
+    }
+
+    private class ViewHolder{
+        ImageView imageView;
+        TextView folderName;
     }
 
     @Override
@@ -41,25 +48,35 @@ public class CustomFolderAdapter extends BaseAdapter implements Filterable{
 
     @Override
     public long getItemId(int position) {
-        return 0;
+        return position;
     }
 
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
+        ViewHolder holder = new ViewHolder();
+        View row = convertView;
+
         inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        if(convertView == null)
-            convertView = inflater.inflate(R.layout.custom_folder_layout,null);
+        if(row == null) {
+            row = inflater.inflate(layout, null);
 
-        TextView folderName = convertView.findViewById(R.id.folderName);
-        ImageView folderImage = convertView.findViewById(R.id.folderImage);
+            holder.folderName = row.findViewById(R.id.folderName);
+            holder.imageView = row.findViewById(R.id.folderImage);
+            row.setTag(holder);
+        }
+        else{
+            holder = (ViewHolder) row.getTag();
+        }
 
-        folderName.setText(folderList.get(position).getFolderName().toString());
+        Folder f = folderList.get(position);
 
-        Bitmap bmp = BitmapFactory.decodeByteArray(folderList.get(position).getImage(), 0, folderList.get(position).getImage().length);
-        folderImage.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200,200, false));
+        holder.folderName.setText(f.getFolderName());
 
-        return convertView;
+        Bitmap bmp = BitmapFactory.decodeByteArray(f.getImage(), 0, f.getImage().length);
+        holder.imageView.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200,200, false));
+
+        return row;
     }
 
     @Override
