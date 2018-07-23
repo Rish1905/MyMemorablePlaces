@@ -121,11 +121,11 @@ public class MainActivity extends AppCompatActivity
     }
 
     public void fetchFolders(){
-        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (foldeName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (folderName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
         Cursor c = myDatabase.rawQuery("SELECT * FROM newFolder ",null);
         if(c.moveToFirst()) {
             do{
-                String folderName = c.getString(c.getColumnIndex("foldeName"));
+                String folderName = c.getString(c.getColumnIndex("folderName"));
                 byte[] folderImage = c.getBlob(c.getColumnIndex("image"));
                 folderArrayList.add(new Folder(folderImage,folderName));
             }while(c.moveToNext());

@@ -4,6 +4,7 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
@@ -88,6 +89,18 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
     public void insertToDB(){
         String folderName = textFolderName.getEditText().getText().toString().trim();
 
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (folderName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+        Cursor c = myDatabase.rawQuery("SELECT folderName FROM newFolder ",null);
+        if(c.moveToFirst()) {
+            do{
+                String name = c.getString(c.getColumnIndex("folderName"));
+                if(folderName.toUpperCase().equals(name.toUpperCase())) {
+                    Toast.makeText(this, "Folder Name Already exsist. Try Again!", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+            }while(c.moveToNext());
+        }
+
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         String currentDateandTime = sdf.format(new Date());
 
@@ -98,7 +111,7 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
-        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (foldeName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (folderName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
         String sql = "INSERT INTO newFolder VALUES (?,?,?)";
         SQLiteStatement statement = myDatabase.compileStatement(sql);
         statement.clearBindings();
