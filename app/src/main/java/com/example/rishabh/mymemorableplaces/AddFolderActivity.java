@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -16,12 +18,15 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
 import android.text.Html;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.afollestad.materialdialogs.MaterialDialog;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
@@ -32,6 +37,9 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
     private TextInputLayout textFolderName;
     private ImageView imageView;
     private CardView button;
+
+    //Database
+    SQLiteDatabase myDatabase;
 
     //Images flags
     private static final int SELECT_PHOTO = 1;
@@ -70,6 +78,11 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
                 }
             }
         });
+
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
     }
 
     public void insertToDB(){
@@ -78,7 +91,34 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
         String currentDateandTime = sdf.format(new Date());
 
+        imageView.setDrawingCacheEnabled(true);
+        imageView.buildDrawingCache();
+        Bitmap bitmap = imageView.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
 
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (foldeName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+        String sql = "INSERT INTO newFolder VALUES (?,?,?)";
+        SQLiteStatement statement = myDatabase.compileStatement(sql);
+        statement.clearBindings();
+        statement.bindString(1,folderName);
+        statement.bindBlob(2,data);
+        statement.bindString(3,currentDateandTime);
+        statement.executeInsert();
+
+        Toast.makeText(this, "Folder Added", Toast.LENGTH_SHORT).show();
+
+        finish();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        if(item.getItemId() == android.R.id.home)
+            finish();
+
+        return super.onOptionsItemSelected(item);
     }
 
     private boolean validateFolderName(){
@@ -101,6 +141,8 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
         textFolderName = findViewById(R.id.text_input_folder_name);
         imageView = (ImageView) findViewById(R.id.image);
         button = (CardView) findViewById(R.id.button);
+
+        myDatabase = this.openOrCreateDatabase("myMemories",MODE_PRIVATE,null);
     }
 
     @Override
