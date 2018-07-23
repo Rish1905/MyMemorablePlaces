@@ -1,5 +1,6 @@
 package com.example.rishabh.mymemorableplaces;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -52,6 +53,14 @@ public class MainActivity extends AppCompatActivity
                     fab_folder.setClickable(true);
                     isOpen=true;
                 }
+            }
+        });
+
+        fab_folder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(MainActivity.this,AddFolderActivity.class);
+                startActivity(intent);
             }
         });
 
