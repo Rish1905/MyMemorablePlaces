@@ -108,7 +108,6 @@ public class AddFolderActivity extends AppCompatActivity implements View.OnClick
         statement.executeInsert();
 
         Toast.makeText(this, "Folder Added", Toast.LENGTH_SHORT).show();
-
         finish();
     }
 
