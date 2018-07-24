@@ -1,8 +1,10 @@
 package com.example.rishabh.mymemorableplaces;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.GridView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -73,10 +76,49 @@ public class ViewNotes extends AppCompatActivity implements android.support.v7.w
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == android.R.id.home)
-            finish();
-
+        switch(item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.add:
+                Intent intent = new Intent(ViewNotes.this,AddNoteActivity.class);
+                intent.putExtra("Folder",fold);
+                intent.putExtra("noteFetched","");
+                startActivity(intent);
+                break;
+            case R.id.delete:
+                deleteNote();
+                break;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    void deleteNote(){
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Delete")
+                .setMessage("Are you sure to delete Folder and its notes!")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myDatabase.execSQL("DELETE FROM newFolder WHERE folderName='"+fold+"'");
+                        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (folderName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
+                        Cursor c = myDatabase.rawQuery("SELECT title FROM newNote WHERE folderName ='"+fold+"'",null);
+                        if(c.moveToFirst()) {
+                            do{
+                                String noteName = c.getString(c.getColumnIndex("title"));
+                                myDatabase.execSQL("DELETE FROM newNote WHERE title='"+noteName+"'");
+                            }while(c.moveToNext());
+                        }
+                        Toast.makeText(getApplicationContext(), "Folder Deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
     }
 
     public void init(){
@@ -123,4 +165,5 @@ public class ViewNotes extends AppCompatActivity implements android.support.v7.w
         adapter.getFilter().filter(newText);
         return true;
     }
+
 }

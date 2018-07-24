@@ -105,6 +105,8 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(MainActivity.this,AddNoteActivity.class);
+                intent.putExtra("Folder","General");
+                intent.putExtra("noteFetched","");
                 startActivity(intent);
             }
         });

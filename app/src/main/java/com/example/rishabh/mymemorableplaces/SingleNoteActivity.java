@@ -37,6 +37,7 @@ public class SingleNoteActivity extends AppCompatActivity {
     String noteFetched = "";
     String lat ="";
     String lng = "";
+    String FolderNam;
 
     //Menu
     private Menu mainMenu;
@@ -77,8 +78,9 @@ public class SingleNoteActivity extends AppCompatActivity {
                 finish();
                 break;
             case R.id.edit:
-                Intent intent = new Intent();
+                Intent intent = new Intent(SingleNoteActivity.this,AddNoteActivity.class);
                 intent.putExtra("noteFetched",noteFetched);
+                intent.putExtra("Folder",FolderNam);
                 startActivity(intent);
                 break;
             case R.id.delete:
@@ -127,6 +129,7 @@ public class SingleNoteActivity extends AppCompatActivity {
                 title.setText(c.getString(c.getColumnIndex("title")));
                 description.setText(c.getString(c.getColumnIndex("description")));
                 folderName.setText("Folder : " + c.getString(c.getColumnIndex("folderName")));
+                FolderNam = c.getString(c.getColumnIndex("folderName"));
                 byte[] data = c.getBlob(c.getColumnIndex("image"));
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
                 imageView.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200,200, false));
@@ -144,5 +147,11 @@ public class SingleNoteActivity extends AppCompatActivity {
         getMenuInflater().inflate(R.menu.delete_edit_menu,menu);
         mainMenu = menu;
         return true;
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        fetchDetails();
     }
 }

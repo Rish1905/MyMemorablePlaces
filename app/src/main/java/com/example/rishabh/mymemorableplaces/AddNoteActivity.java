@@ -51,11 +51,14 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     //Variables
     ImageView noteImage;
     TextInputLayout title;
+    EditText titleEditText;
+    EditText descriptionEditText;
     TextInputLayout description;
     Spinner spinner;
     TextView locationText;
     ImageButton locationButton;
     CardView button;
+    TextView buttonText;
 
     //Database
     SQLiteDatabase myDatabase;
@@ -85,6 +88,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     private boolean hasImageChanged = false;
 
     Bitmap thumbnail;
+
+    String NoteName = "";
 
 
     @Override
@@ -149,6 +154,38 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 }
             }
         });
+
+        Intent intent = getIntent();
+        String foldName = intent.getStringExtra("Folder");
+        NoteName = intent.getStringExtra("noteFetched");
+        for(int i = 0 ; i < folderNames.size() ; i++){
+            if(folderNames.get(i).equals(foldName)){
+                spinner.setSelection(i);
+                break;
+            }
+        }
+
+        if(!NoteName.equals("")) construct_layout();
+    }
+
+    void construct_layout(){
+        title.setEnabled(false);
+        spinner.setEnabled(false);
+        buttonText.setText("Update Note");
+        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
+        Cursor c = myDatabase.rawQuery("SELECT * FROM newNote WHERE title='"+NoteName+"' ",null);
+        if(c.moveToFirst()) {
+            do{
+                titleEditText.setText(c.getString(c.getColumnIndex("title")));
+                descriptionEditText.setText(c.getString(c.getColumnIndex("description")));
+                byte[] data = c.getBlob(c.getColumnIndex("image"));
+                Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
+                noteImage.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200,200, false));
+                String[] temp = c.getString(c.getColumnIndex("location")).split(" ");
+                lat = temp[0];
+                lng = temp[1];
+            }while(c.moveToNext());
+        }
     }
 
     public void insertToDB(){
@@ -158,18 +195,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         if(lat.equals("") && lng.equals("")){
             Toast.makeText(this, "Location Unknown", Toast.LENGTH_SHORT).show();
             return;
-        }
-
-        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
-        Cursor c = myDatabase.rawQuery("SELECT title FROM newNote ",null);
-        if(c.moveToFirst()) {
-            do{
-                String name = c.getString(c.getColumnIndex("title"));
-                if(noteName.toUpperCase().equals(name.toUpperCase())) {
-                    Toast.makeText(this, "Note Name Already exsist. Try Again!", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-            }while(c.moveToNext());
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy HH:mm:ss");
@@ -182,19 +207,48 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         byte[] data = baos.toByteArray();
 
-        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
-        String sql = "INSERT INTO newNote VALUES (?,?,?,?,?,?)";
-        SQLiteStatement statement = myDatabase.compileStatement(sql);
-        statement.clearBindings();
-        statement.bindBlob(1,data);
-        statement.bindString(2,noteName);
-        statement.bindString(3,noteDescription);
-        statement.bindString(4,selectedSpinner);
-        statement.bindString(5,lat+" "+lng);
-        statement.bindString(6,currentDateandTime);
-        statement.executeInsert();
+        if(NoteName.equals("")){
 
-        Toast.makeText(this, "Note Added", Toast.LENGTH_SHORT).show();
+            myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
+            Cursor c = myDatabase.rawQuery("SELECT title FROM newNote ",null);
+            if(c.moveToFirst()) {
+                do{
+                    String name = c.getString(c.getColumnIndex("title"));
+                    if(noteName.toUpperCase().equals(name.toUpperCase())) {
+                        Toast.makeText(this, "Note Name Already exsist. Try Again!", Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                }while(c.moveToNext());
+            }
+
+            myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
+            String sql = "INSERT INTO newNote VALUES (?,?,?,?,?,?)";
+            SQLiteStatement statement = myDatabase.compileStatement(sql);
+            statement.clearBindings();
+            statement.bindBlob(1,data);
+            statement.bindString(2,noteName);
+            statement.bindString(3,noteDescription);
+            statement.bindString(4,selectedSpinner);
+            statement.bindString(5,lat+" "+lng);
+            statement.bindString(6,currentDateandTime);
+            statement.executeInsert();
+
+            Toast.makeText(this, "Note Added", Toast.LENGTH_SHORT).show();
+        }
+        else{
+            //myDatabase.execSQL("UPDATE newNote SET image="+data+" ,description='"+noteDescription+"' ,location='"+lat+" "+lng+"' WHERE title='"+NoteName+"'");
+            String sql = "UPDATE newNote SET image= ? ,description=? ,location=? WHERE title=?";
+            SQLiteStatement statement = myDatabase.compileStatement(sql);
+            statement.clearBindings();
+            statement.bindBlob(1,data);
+            statement.bindString(2,noteDescription);
+            statement.bindString(3,lat+" "+lng);
+            statement.bindString(4,NoteName);
+            statement.executeInsert();
+            Toast.makeText(this, "Note Updated", Toast.LENGTH_SHORT).show();
+        }
+
+
         finish();
     }
 
@@ -244,6 +298,9 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         locationText.setText("Location unknown");
         locationButton = (ImageButton) findViewById(R.id.locationButton);
         button = (CardView) findViewById(R.id.button);
+        titleEditText = (EditText) findViewById(R.id.titleEditText);
+        descriptionEditText = (EditText) findViewById(R.id.descriptionEditText);
+        buttonText = (TextView) findViewById(R.id.buttonText);
 
         myDatabase = this.openOrCreateDatabase("myMemories",MODE_PRIVATE,null);
 
