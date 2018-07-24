@@ -55,7 +55,8 @@
         <activity
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps" />
-        <activity android:name=".ViewNotes"></activity>
+        <activity android:name=".ViewNotes" />
+        <activity android:name=".SingleNoteActivity"></activity>
     </application>
 
 </manifest>

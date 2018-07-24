@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.GridView;
 
 import java.util.ArrayList;
@@ -51,6 +52,15 @@ public class MainActivity extends AppCompatActivity
 
         adapter = new CustomFolderAdapter(this, R.layout.custom_folder_layout, folderArrayList);
         gridView.setAdapter(adapter);
+
+        gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this,ViewNotes.class);
+                intent.putExtra("folderName",folderArrayList.get(position).getFolderName());
+                startActivity(intent);
+            }
+        });
 
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -190,6 +200,7 @@ public class MainActivity extends AppCompatActivity
             // Handle the camera action
 
             Intent intent = new Intent(MainActivity.this,ViewNotes.class);
+            intent.putExtra("folderName","General");
             startActivity(intent);
         } else if (id == R.id.nav_gallery) {
 
