@@ -1,11 +1,13 @@
 package com.example.rishabh.mymemorableplaces;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -213,9 +215,43 @@ public class MainActivity extends AppCompatActivity
             intent.putExtra("folderName","General");
             startActivity(intent);
         }
+        else if(id == R.id.nav_aboutDeveloper){
+            Intent intent = new Intent(MainActivity.this,AboutDeveloper.class);
+            startActivity(intent);
+        }
+        else if(id == R.id.nav_contactus){
+            Intent intent = new Intent(MainActivity.this,ContactUsActivity.class);
+            startActivity(intent);
+        }
+        else if(id == R.id.nav_reset){
+            delete();
+        }
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+    void delete(){
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Reset")
+                .setMessage("Are you sure you want to Delete All!")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myDatabase.execSQL("DROP TABLE 'newFolder'");
+                        myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
+                        myDatabase.execSQL("DROP TABLE 'newNote'");
+                        Toast.makeText(getApplicationContext(), "Database Reset", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
+
     }
 
     @Override
