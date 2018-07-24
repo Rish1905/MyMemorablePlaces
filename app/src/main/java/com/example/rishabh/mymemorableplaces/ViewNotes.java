@@ -5,6 +5,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -12,7 +13,7 @@ import android.widget.GridView;
 
 import java.util.ArrayList;
 
-public class ViewNotes extends AppCompatActivity {
+public class ViewNotes extends AppCompatActivity implements android.support.v7.widget.SearchView.OnQueryTextListener {
 
     //List of Folders
     ArrayList<Note> noteArrayList;
@@ -54,6 +55,20 @@ public class ViewNotes extends AppCompatActivity {
             getSupportActionBar().setDisplayShowHomeEnabled(true);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        if(fold.equals("General"))
+            getMenuInflater().inflate(R.menu.search_add, menu);
+        else
+            getMenuInflater().inflate(R.menu.delete_search_add,menu);
+        MenuItem menuItem = menu.findItem(R.id.search);
+        android.support.v7.widget.SearchView searchView = (android.support.v7.widget.SearchView) menuItem.getActionView();
+        searchView.setOnQueryTextListener(this);
+        return true;
+    }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -98,4 +113,14 @@ public class ViewNotes extends AppCompatActivity {
         adapter.notifyDataSetChanged();
     }
 
+    @Override
+    public boolean onQueryTextSubmit(String query) {
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String newText) {
+        adapter.getFilter().filter(newText);
+        return true;
+    }
 }

@@ -21,7 +21,7 @@ public class CustomNoteAdapter extends BaseAdapter implements Filterable {
     private int layout;
     ArrayList<Note> noteList;
     ArrayList<Note> filterList;
-    CustomFolderAdapter.CustomFilter filter;
+    CustomFilter filter;
 
     public CustomNoteAdapter(Context context,int layout, ArrayList<Note> noteList){
         this.noteList = noteList;
@@ -80,11 +80,10 @@ public class CustomNoteAdapter extends BaseAdapter implements Filterable {
 
     @Override
     public Filter getFilter() {
-      /*  if(filter == null){
-            filter = new CustomFolderAdapter.CustomFilter();
+        if(filter == null){
+            filter = new CustomFilter();
         }
-        return filter;*/
-      return null;
+        return filter;
     }
 
     class CustomFilter extends Filter{
@@ -92,15 +91,15 @@ public class CustomNoteAdapter extends BaseAdapter implements Filterable {
         @Override
         protected FilterResults performFiltering(CharSequence constraint) {
 
-          /*  FilterResults results = new FilterResults();
+            FilterResults results = new FilterResults();
             if(constraint != null && constraint.length() > 0 ){
                 constraint = constraint.toString().toUpperCase();
-                ArrayList<Folder> filters = new ArrayList<Folder>();
+                ArrayList<Note> filters = new ArrayList<Note>();
 
                 for(int i = 0 ; i < filterList.size(); i++){
-                    if(filterList.get(i).getFolderName().toUpperCase().contains(constraint)){
-                        Folder f = new Folder(filterList.get(i).getImage(),filterList.get(i).getFolderName());
-                        filters.add(f);
+                    if(filterList.get(i).getTitle().toUpperCase().contains(constraint)){
+                        Note  n = new Note(filterList.get(i).getTitle(),filterList.get(i).getData());
+                        filters.add(n);
                     }
                 }
                 results.count = filters.size();
@@ -109,14 +108,14 @@ public class CustomNoteAdapter extends BaseAdapter implements Filterable {
             else{
                 results.count = filterList.size();
                 results.values = filterList;
-            }*/
-            return null;
+            }
+            return results;
         }
 
         @Override
         protected void publishResults(CharSequence constraint, FilterResults results) {
-          /*  folderList = (ArrayList<Folder>) results.values;
-            notifyDataSetChanged();*/
+            noteList = (ArrayList<Note>) results.values;
+            notifyDataSetChanged();
         }
     }
 }

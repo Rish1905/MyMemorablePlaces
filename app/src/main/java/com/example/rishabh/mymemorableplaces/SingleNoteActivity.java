@@ -1,20 +1,26 @@
 package com.example.rishabh.mymemorableplaces;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.SweepGradient;
 import android.media.Image;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.MultiAutoCompleteTextView;
+import android.widget.Switch;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class SingleNoteActivity extends AppCompatActivity {
 
@@ -31,6 +37,9 @@ public class SingleNoteActivity extends AppCompatActivity {
     String noteFetched = "";
     String lat ="";
     String lng = "";
+
+    //Menu
+    private Menu mainMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,10 +72,41 @@ public class SingleNoteActivity extends AppCompatActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
-        if(item.getItemId() == android.R.id.home)
-            finish();
-
+        switch(item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.edit:
+                Intent intent = new Intent();
+                intent.putExtra("noteFetched",noteFetched);
+                startActivity(intent);
+                break;
+            case R.id.delete:
+                deleteNote();
+                break;
+        }
         return super.onOptionsItemSelected(item);
+    }
+
+    void deleteNote(){
+        new AlertDialog.Builder(this)
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .setTitle("Delete")
+                .setMessage("Are you sure you want to delete the note!")
+                .setPositiveButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        myDatabase.execSQL("DELETE FROM newNote WHERE title='"+noteFetched+"'");
+                        Toast.makeText(getApplicationContext(), "Note Deleted", Toast.LENGTH_SHORT).show();
+                        finish();
+                    }
+                })
+                .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    }
+                }).show();
+
     }
 
     public void init(){
@@ -95,5 +135,14 @@ public class SingleNoteActivity extends AppCompatActivity {
                 lng = temp[1];
             }while(c.moveToNext());
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+
+        getMenuInflater().inflate(R.menu.delete_edit_menu,menu);
+        mainMenu = menu;
+        return true;
     }
 }
