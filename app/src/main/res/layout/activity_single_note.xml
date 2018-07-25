@@ -73,7 +73,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_centerInParent="true"
-                    android:text="Show on Google Maps"
+                    android:text="Show location on map"
                     android:textColor="#fff" />
             </RelativeLayout>
 

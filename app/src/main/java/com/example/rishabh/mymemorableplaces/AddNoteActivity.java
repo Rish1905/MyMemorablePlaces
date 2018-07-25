@@ -25,6 +25,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -247,8 +248,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
             statement.executeInsert();
             Toast.makeText(this, "Note Updated", Toast.LENGTH_SHORT).show();
         }
-
-
         finish();
     }
 

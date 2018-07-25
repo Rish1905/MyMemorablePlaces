@@ -56,11 +56,9 @@ public class SingleNoteActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String geo = "geo:"+lat+","+lng+"?q="+lat+","+lng+"("+noteFetched+")";
-                Uri gmmIntentUri = Uri.parse(geo);
-                Intent mapIntent = new Intent(Intent.ACTION_VIEW, gmmIntentUri);
-                mapIntent.setPackage("com.google.android.apps.maps");
-                startActivity(mapIntent);
+                Intent intent = new Intent(SingleNoteActivity.this,ShowLocationActivity.class);
+                intent.putExtra("location",lat+" "+lng);
+                startActivity(intent);
             }
         });
 
