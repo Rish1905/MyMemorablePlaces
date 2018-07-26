@@ -1,4 +1,4 @@
-package com.example.rishabh.mymemorableplaces;
+package com.developer.rishabh.mymemorableplaces;
 
 public class Note {
     public Note(String title, byte[] data) {

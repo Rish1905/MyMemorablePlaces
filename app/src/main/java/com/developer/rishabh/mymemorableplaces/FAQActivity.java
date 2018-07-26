@@ -1,4 +1,4 @@
-package com.example.rishabh.mymemorableplaces;
+package com.developer.rishabh.mymemorableplaces;
 
 import android.content.DialogInterface;
 import android.support.v7.app.AlertDialog;
