@@ -71,8 +71,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     ArrayAdapter<String> adapter;
 
     //Lat and Langs
-    static public String lat = "";
-    static public String lng = "";
+    static  String latitudes = "";
+    static  String longitudes = "";
 
     //Current Location
     private LocationManager locationManager;
@@ -91,6 +91,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     Bitmap thumbnail;
 
     String NoteName = "";
+    String foldName = "";
 
 
     @Override
@@ -124,9 +125,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         listener = new LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                locationText.setText("Location Saved");
-                lat = Double.toString(location.getLatitude());
-                lng = Double.toString(location.getLongitude());
             }
 
             @Override
@@ -157,7 +155,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         });
 
         Intent intent = getIntent();
-        String foldName = intent.getStringExtra("Folder");
+        foldName = intent.getStringExtra("Folder");
         NoteName = intent.getStringExtra("noteFetched");
         for(int i = 0 ; i < folderNames.size() ; i++){
             if(folderNames.get(i).equals(foldName)){
@@ -173,6 +171,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         title.setEnabled(false);
         spinner.setEnabled(false);
         buttonText.setText("Update Note");
+        locationText.setText("Location Saved");
         myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newNote (image BLOB,title VARCHAR PRIMARY KEY, description VARCHAR, folderName VARCHAR, location VARCHAR, date VARCHAR)");
         Cursor c = myDatabase.rawQuery("SELECT * FROM newNote WHERE title='"+NoteName+"' ",null);
         if(c.moveToFirst()) {
@@ -183,8 +182,8 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
                 Bitmap bmp = BitmapFactory.decodeByteArray(data, 0, data.length);
                 noteImage.setImageBitmap(Bitmap.createScaledBitmap(bmp, 200,200, false));
                 String[] temp = c.getString(c.getColumnIndex("location")).split(" ");
-                lat = temp[0];
-                lng = temp[1];
+                latitudes = temp[0];
+                longitudes = temp[1];
             }while(c.moveToNext());
         }
     }
@@ -193,7 +192,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         String noteName = title.getEditText().getText().toString().trim();
         String noteDescription = description.getEditText().getText().toString().trim();
 
-        if(lat.equals("") && lng.equals("")){
+        if(latitudes.equals("") && longitudes.equals("")){
             Toast.makeText(this, "Location Unknown", Toast.LENGTH_SHORT).show();
             return;
         }
@@ -230,10 +229,9 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
             statement.bindString(2,noteName);
             statement.bindString(3,noteDescription);
             statement.bindString(4,selectedSpinner);
-            statement.bindString(5,lat+" "+lng);
+            statement.bindString(5,latitudes+" "+longitudes);
             statement.bindString(6,currentDateandTime);
             statement.executeInsert();
-
             Toast.makeText(this, "Note Added", Toast.LENGTH_SHORT).show();
         }
         else{
@@ -243,7 +241,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
             statement.clearBindings();
             statement.bindBlob(1,data);
             statement.bindString(2,noteDescription);
-            statement.bindString(3,lat+" "+lng);
+            statement.bindString(3,latitudes+" "+longitudes);
             statement.bindString(4,NoteName);
             statement.executeInsert();
             Toast.makeText(this, "Note Updated", Toast.LENGTH_SHORT).show();
@@ -304,7 +302,6 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
         myDatabase = this.openOrCreateDatabase("myMemories",MODE_PRIVATE,null);
 
         folderNames = new ArrayList<String>();
-        folderNames.add("General");
 
         locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
     }
@@ -351,9 +348,15 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
             @SuppressLint("MissingPermission")
             @Override
             public void onClick(View view) {
-                //noinspection MissingPermission
-                locationManager.requestLocationUpdates("gps", 5000, 0, listener);
                 Intent intent = new Intent(AddNoteActivity.this,MapsActivity.class);
+                if(!NoteName.equals("")){
+                    intent.putExtra("locationRequest",latitudes+" "+longitudes);
+                    intent.putExtra("NoteName",NoteName);
+                }
+                else{
+                    intent.putExtra("locationRequest","");
+                    intent.putExtra("NoteName","");
+                }
                 startActivity(intent);
             }
         });
@@ -362,7 +365,7 @@ public class AddNoteActivity extends AppCompatActivity implements View.OnClickLi
     @Override
     protected void onResume() {
         super.onResume();
-        if(!lat.equals("") && !lng.equals("")){
+        if(!latitudes.equals("") && !longitudes.equals("")){
             locationText.setText("Location Saved");
         }
     }

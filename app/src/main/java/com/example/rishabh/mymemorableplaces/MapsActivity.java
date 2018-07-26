@@ -15,10 +15,13 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.widget.Toolbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -34,11 +37,15 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener{
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapLongClickListener{
 
     private GoogleMap mMap;
     LocationManager locationManager;
     LocationListener locationListener;
+
+    String lat = "";
+    String lng = "";
+    String NoteName = "";
 
     public void centerMapOnLocation(Location location, String title) {
         if (location != null) {
@@ -50,6 +57,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.tick_menu, menu);
+        return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        switch(item.getItemId()){
+            case android.R.id.home:
+                finish();
+                break;
+            case R.id.tick:
+                AddNoteActivity.latitudes = lat;
+                AddNoteActivity.longitudes = lng;
+                if(NoteName.equals(""))
+                    Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
+                else
+                    Toast.makeText(this, "Location Update", Toast.LENGTH_SHORT).show();
+                finish();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
 
@@ -57,7 +92,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                 locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,0,0,locationListener);
                 Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-                if(lastKnownLocation != null) {
+                if(lastKnownLocation != null && NoteName.equals("")) {
                     addLocation(lastKnownLocation);
                     centerMapOnLocation(lastKnownLocation, "Your Location");
                 }
@@ -100,6 +135,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+        if(getSupportActionBar()!=null){
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+            getSupportActionBar().setDisplayShowHomeEnabled(true);
+        }
     }
 
     @Override
@@ -107,40 +146,55 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         mMap = googleMap;
 
+        Intent intent = getIntent();
+        NoteName = intent.getStringExtra("NoteName");
+        String s = intent.getStringExtra("locationRequest");
+        if(!s.equals("") && !s.equals(" ")) {
+            String[] temp = s.split(" ");
+            lat = temp[0];
+            lng = temp[1];
+            Location temp1 = new Location(LocationManager.GPS_PROVIDER);
+            temp1.setLatitude(Double.parseDouble(lat));
+            temp1.setLongitude(Double.parseDouble(lng));
+            addLocation(temp1);
+            centerMapOnLocation(temp1,"Your Location");
+        }
+
         mMap.setOnMapLongClickListener(this);
 
-        locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-        locationListener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-            }
+            locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            locationListener = new LocationListener() {
+                @Override
+                public void onLocationChanged(Location location) {
+                }
 
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
+                @Override
+                public void onStatusChanged(String s, int i, Bundle bundle) {
 
-            }
+                }
 
-            @Override
-            public void onProviderEnabled(String s) {
+                @Override
+                public void onProviderEnabled(String s) {
 
-            }
+                }
 
-            @Override
-            public void onProviderDisabled(String s) {
+                @Override
+                public void onProviderDisabled(String s) {
 
-            }
-        };
+                }
+            };
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
             Location lastKnownLocation = locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER);
-            if(lastKnownLocation != null){
+            if (lastKnownLocation != null && NoteName.equals("")) {
                 addLocation(lastKnownLocation);
                 centerMapOnLocation(lastKnownLocation, "Your Location");
             }
         } else {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
         }
+
     }
 
 
@@ -158,9 +212,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        finish();
+    }
+
     void addLocation(Location location){
-        AddNoteActivity.lat = "" + location.getLatitude();
-        AddNoteActivity.lng = "" + location.getLongitude();
-        Toast.makeText(this,"Location Saved!",Toast.LENGTH_SHORT).show();
+        lat = "" + location.getLatitude();
+        lng ="" +location.getLongitude();
+        if(NoteName.equals(""))
+            Toast.makeText(this, "Location Saved", Toast.LENGTH_SHORT).show();
     }
 }

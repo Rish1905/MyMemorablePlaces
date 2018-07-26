@@ -57,7 +57,7 @@ public class SingleNoteActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent(SingleNoteActivity.this,ShowLocationActivity.class);
-                intent.putExtra("location",lat+" "+lng);
+                intent.putExtra("locationResults",lat+" "+lng);
                 startActivity(intent);
             }
         });

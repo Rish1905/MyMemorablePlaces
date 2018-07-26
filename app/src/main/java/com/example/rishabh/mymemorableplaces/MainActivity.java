@@ -4,6 +4,10 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.design.widget.FloatingActionButton;
@@ -26,6 +30,7 @@ import android.widget.GridView;
 import android.widget.SearchView;
 import android.widget.Toast;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity
@@ -143,6 +148,22 @@ public class MainActivity extends AppCompatActivity
     public void fetchFolders(){
         myDatabase.execSQL("CREATE TABLE IF NOT EXISTS newFolder (folderName VARCHAR PRIMARY KEY, image BLOB, date VARCHAR)");
         Cursor c = myDatabase.rawQuery("SELECT * FROM newFolder ",null);
+
+        if(c.getCount() == 0) {
+
+            Drawable myIcon = getResources().getDrawable(R.drawable.folder_default);
+            Bitmap bitmap = ((BitmapDrawable) myIcon).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+            String sql = "INSERT INTO newFolder VALUES (?,?,?)";
+            SQLiteStatement statement = myDatabase.compileStatement(sql);
+            statement.clearBindings();
+            statement.bindString(1, "General");
+            statement.bindBlob(2, data);
+            statement.bindString(3, "");
+            statement.executeInsert(); }
+
         if(c.moveToFirst()) {
             do{
                 String folderName = c.getString(c.getColumnIndex("folderName"));
